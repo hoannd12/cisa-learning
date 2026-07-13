@@ -86,8 +86,9 @@ def parse_domain_md(filepath, domain_number):
     body = '\n'.join(lines[start_idx:])
     
     # Find chapter-level sections (X.Y pattern) - also handle OCR 's' instead of digit
+    # and spaces in numbers like "5. 10"
     chapter_pattern = re.compile(
-        r'^(?:#{1,3}\s*)?([0-9s]\.\d+)\s+([A-Z][^\n]+)',
+        r'^(?:#{1,3}\s*)?([0-9s]\.\s*\d+)\s+([A-Z][^\n]+)',
         re.MULTILINE
     )
     
@@ -95,7 +96,7 @@ def parse_domain_md(filepath, domain_number):
     matches = list(chapter_pattern.finditer(body))
     
     for i, match in enumerate(matches):
-        ch_id = match.group(1).replace('s.', f'{domain_number}.')
+        ch_id = match.group(1).replace('s.', f'{domain_number}.').replace(' ', '')
         ch_title = match.group(2).strip()
         
         # Skip TOC lines (contain dots like ........)
@@ -109,7 +110,7 @@ def parse_domain_md(filepath, domain_number):
         
         # Parse sub-sections (X.Y.Z pattern) - handle OCR errors, spaces in numbers
         sub_pattern = re.compile(
-            r'^(?:#{1,4}\s*)?([0-9s]\.\d+\.?\s*\d+)\s+([A-Z][^\n]+)',
+            r'^(?:#{1,4}\s*)?([0-9s]\.\d{1,2}\.?\s*\d{1,2})\s+([A-Z][^\n]+)',
             re.MULTILINE
         )
         sub_matches = list(sub_pattern.finditer(ch_content))
