@@ -70,14 +70,23 @@ const Components = {
 
   // Render login page
   renderLogin() {
+    const googleBtnHtml = FIREBASE_ENABLED ? `
+          <div class="login-divider"><span>or</span></div>
+          <button class="btn-google" onclick="App.handleGoogleLogin()">
+            <svg width="18" height="18" viewBox="0 0 18 18"><path d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z" fill="#4285F4"/><path d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z" fill="#34A853"/><path d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z" fill="#FBBC05"/><path d="M8.98 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59A8 8 0 0 0 1.83 5.4l2.67 2.07A4.77 4.77 0 0 1 8.98 3.58z" fill="#EA4335"/></svg>
+            Sign in with Google
+          </button>` : '';
+
     return `
       <div class="login-page">
         <div class="login-card">
           <h2>CISA E-Learning</h2>
           <p>Sign in to access your study materials</p>
+          ${googleBtnHtml}
+          ${FIREBASE_ENABLED ? '<div class="login-divider"><span>or use local account</span></div>' : ''}
           <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" id="username" placeholder="Enter username" autocomplete="username">
+            <input type="text" id="username" placeholder="Enter username" autocomplete="username" value="hoannd">
           </div>
           <div class="form-group">
             <label for="password">Password</label>
@@ -190,6 +199,12 @@ const Components = {
           </div>
         </div>
         ${partsHtml}
+        ${MISSING_SECTIONS[domain.id] ? `
+        <div class="missing-note">
+          <div class="missing-note-title">⚠ Sections pending manual review</div>
+          <p>The following sections could not be fully extracted from the PDF source. Content may be partially included in adjacent sections. Please refer to the official CISA Review Manual for complete coverage.</p>
+          <ul>${MISSING_SECTIONS[domain.id].map(s => '<li>' + s + '</li>').join('')}</ul>
+        </div>` : ''}
       </div>
     `;
   },

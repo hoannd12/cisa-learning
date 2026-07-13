@@ -64,8 +64,15 @@ const App = {
     const password = document.getElementById('password').value;
     const errorEl = document.getElementById('loginError');
 
-    if (username === 'hoannd' && password === 'Cisa2024!') {
-      localStorage.setItem('cisa_user', username);
+    // Valid users
+    const VALID_USERS = {
+      'hoannd': 'Cisa2024!',
+      'anhnv31': 'Cisa2024!',
+      'chinhpt6': 'Cisa2024!',
+    };
+
+    if (VALID_USERS[username] && VALID_USERS[username] === password) {
+      localStorage.setItem('cisa_user', JSON.stringify({ displayName: username, email: '' }));
       location.hash = '#domains';
     } else {
       errorEl.classList.add('visible');
@@ -73,9 +80,26 @@ const App = {
     }
   },
 
+  // Handle Google Login
+  async handleGoogleLogin() {
+    const user = await signInWithGoogle();
+    if (user) {
+      location.hash = '#domains';
+    } else {
+      const errorEl = document.getElementById('loginError');
+      if (errorEl) {
+        errorEl.textContent = 'Google sign-in failed. Try again.';
+        errorEl.classList.add('visible');
+        setTimeout(() => errorEl.classList.remove('visible'), 3000);
+      }
+    }
+  },
+
   // Logout
   logout() {
+    firebaseSignOut();
     localStorage.removeItem('cisa_user');
+    localStorage.removeItem('cisa_progress');
     location.hash = '#login';
   },
 
@@ -97,6 +121,10 @@ const App = {
       progress[sectionId] = true;
     }
     localStorage.setItem('cisa_progress', JSON.stringify(progress));
+    // Sync to cloud if Firebase is active
+    if (FIREBASE_ENABLED && currentUser) {
+      saveProgressToCloud();
+    }
     this.route(); // Re-render
   },
 
